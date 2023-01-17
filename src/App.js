@@ -48,8 +48,6 @@ const App = () => {
 
 
         setRandomPotions(arrayPoison.length,arrayPotion.length)
-        console.log(potion)
-        console.log(poison)
         
       }
 
@@ -62,6 +60,7 @@ const App = () => {
   }
   function getRandomDice (){
     let random = Math.floor(Math.random() * ((6-1) - 0 + 1)) + 0
+    random=random+1
     return random
   }
   function setRandomPotions(lengthPoison, lengthPotion){
@@ -72,9 +71,9 @@ const App = () => {
   }
 
   function winner(poison,potion){
-    let poisonValue = (poison.dice*(poison.dice/10)*poison.power)/poison.mana
+    let poisonValue = ((potion.dice)*((potion.dice)/10)*poison.power)/poison.mana
     poison.value=poisonValue
-    let potionValue = (potion.dice*(potion.dice/10)*potion.power)/potion.mana
+    let potionValue = ((potion.dice)*((potion.dice)/10)*potion.power)/potion.mana
     potion.value=potionValue
    if(poisonValue>potionValue){
     setWinnerPotion(poison)
@@ -128,8 +127,8 @@ const App = () => {
 
         </div>
         <div className="center" style={{display:"flex", flexDirection:"column", alignItems: "center"}} >
-        <p style={{ width:"600px", height:"50px",textAlign: "center", border: "1px solid #000" }} >{winnerPotion.name}<br></br>Resultado de la pocion ganadora = {winnerPotion.dice}X{winnerPotion.dice/10}X{winnerPotion.power}/{winnerPotion.mana} = {winnerPotion.value}</p>
-        <p style={{ width:"600px", height:"50px",textAlign: "center", border: "1px solid #000" }} >{loserPotion.name}<br></br>Resultado de la pocion perdedora = {loserPotion.dice}X{loserPotion.dice/10}X{loserPotion.power}/{loserPotion.mana} = {loserPotion.value}</p>
+        <p style={{ width:"600px", height:"100px",textAlign: "center", border: "1px solid #000" }} >{winnerPotion.name}<br></br>Resultado de la pocion ganadora = {winnerPotion.dice}X{(winnerPotion.dice)/10}X{winnerPotion.power}/{winnerPotion.mana} = {winnerPotion.value}</p>
+        <p style={{ width:"600px", height:"100px",textAlign: "center", border: "1px solid #000" }} >{loserPotion.name}<br></br>Resultado de la pocion perdedora = {loserPotion.dice}X{(loserPotion.dice)/10}X{loserPotion.power}/{loserPotion.mana} = {loserPotion.value}</p>
         </div>
         <button   style={{
         fontSize:75,
