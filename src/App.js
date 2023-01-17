@@ -3,18 +3,21 @@ import axios from "axios"
 import diceArray from "./images.js"
 import potionImg from "./assets/potion.png"
 import poisonImg from "./assets/poison.png"
+import AppContext from './context';
+import HomePage from "./components/HomePage.js";
+import BattlePage from "./components/BattlePage.js";
+import FinalPage from "./components/FinalPage.js";
 
-
-export const context = React.createContext();
 
 let arrayPotion = []
 let arrayPoison = []
 let potion
 let poison
+let winnerPotion
+let loserPotion
 const App = () => {
 
-  const [winnerPotion, setWinnerPotion] = React.useState(null);
-  const [loserPotion, setLoserPotion] = React.useState(null);
+  const [globalState, setGlobalState] = React.useState(null);
   const [data, setData] = React.useState(null);
   const [page, setPage] = React.useState("home");
   
@@ -25,13 +28,21 @@ const App = () => {
         responseType: "json",
       })
       .then((response) => {
-        console.log("response")
-        console.log(response.data)
+
          setData(response.data)
+         handleGlobalState({page: "home"})
 
       });
   
   }, []);
+
+  const handleGlobalState = data => {
+    setGlobalState(globalState => ({
+      ...globalState,
+      ...data,
+    }));
+   
+  };
 
 
   React.useEffect(() => {
@@ -68,6 +79,10 @@ const App = () => {
     potion = arrayPotion[getRandom(lengthPotion)]
     potion.dice = getRandomDice()
     poison.dice = getRandomDice()
+    handleGlobalState({poison})
+    handleGlobalState({potion})
+
+    winner(poison,potion)
   }
 
   function winner(poison,potion){
@@ -76,72 +91,28 @@ const App = () => {
     let potionValue = ((potion.dice)*((potion.dice)/10)*potion.power)/potion.mana
     potion.value=potionValue
    if(poisonValue>potionValue){
-    setWinnerPotion(poison)
-    setLoserPotion(potion)
+    winnerPotion = poison
+    loserPotion = potion
+    handleGlobalState({winnerPotion})
+    handleGlobalState({loserPotion})
    }
    else{
-    setWinnerPotion(potion)
-    setLoserPotion(poison)
+    winnerPotion = potion
+    loserPotion = poison
+    handleGlobalState({winnerPotion})
+    handleGlobalState({loserPotion})
    }
   }
 
 
 
-
   return (
+    <AppContext.Provider value={{globalState,handleGlobalState,setRandomPotions}}>
   <>
-{data ? (page==="home" ?(    <div>
-    <h1 style={{textAlign:"center", marginTop:100}}>LAS PÓCIMAS REBELDES</h1>
-    <button  style={{
-      position: 'absolute', left: '50%', top: '50%',
-      transform: 'translate(-50%, -50%)',
-      width:1000,
-      height:90,
-      fontSize:75,
-      textAlign:"center",
-
-  }} onClick={() => setPage("battle")} >ENTER</button>
-  </div>):
-  ( page==="battle"?(    <div style={{display:"flex", flexDirection:"column", alignItems: "center"}}>
-    <div style={{display:"flex", alignItems: "center"}}>
-    <img style={{width:"200px", height:"200px"}} src={potionImg} alt=""/>
-        <img src={diceArray[poison.dice-1]} alt=""/>
-        <img src={diceArray[potion.dice-1]} alt=""/>
-        <img style={{width:"200px", height:"200px"}} src={poisonImg} alt=""/>
-
-
-    </div>
-    <div  style={{display:"flex", alignItems: "center"}}>
-    <p style={{ width:"600px", height:"150px", textAlign: "center", border: "1px solid #000", margin:"auto" }} >Name: {poison.name}<br></br>Alias: {poison.alias}<br></br>Curative: false<br></br>Power: {poison.power}<br></br>Mana: {poison.mana}<br></br></p>
-    <p style={{ width:"600px", height:"150px",textAlign: "center", border: "1px solid #000" }} >Name: {potion.name}<br></br>Alias: {potion.alias}<br></br>Curative: true<br></br>Power: {potion.power}<br></br>Mana: {potion.mana}<br></br></p>
-    </div>
-    <button   style={{
-    fontSize:75,
-    textAlign:"center",
-
-}} onClick={() => {setPage("final"); winner(poison,potion)}}>LAUNCH BATTLE</button>
-</div>):(    <div  style={{display:"flex", flexDirection:"column", alignItems: "center"}}>
-        <div className="center">
-        <img src={diceArray[winnerPotion.dice-1]} alt=""/>
-        {winnerPotion.curative? (<img style={{width:"200px", height:"200px"}} src={poisonImg} alt=""/>):(<img style={{width:"200px", height:"200px"}} src={potionImg} alt=""/>)}
-
-        </div>
-        <div className="center" style={{display:"flex", flexDirection:"column", alignItems: "center"}} >
-        <p style={{ width:"600px", height:"100px",textAlign: "center", border: "1px solid #000" }} >{winnerPotion.name}<br></br>Resultado de la pocion ganadora = {winnerPotion.dice}X{(winnerPotion.dice)/10}X{winnerPotion.power}/{winnerPotion.mana} = {winnerPotion.value}</p>
-        <p style={{ width:"600px", height:"100px",textAlign: "center", border: "1px solid #000" }} >{loserPotion.name}<br></br>Resultado de la pocion perdedora = {loserPotion.dice}X{(loserPotion.dice)/10}X{loserPotion.power}/{loserPotion.mana} = {loserPotion.value}</p>
-        </div>
-        <button   style={{
-        fontSize:75,
-        textAlign:"center",
-
-    }} 
-    onClick={() => {setPage("battle"); setRandomPotions(arrayPoison.length,arrayPotion.length)}} >PLAY AGAIN</button>
-    </div>))):(null)}
-
-
-
-
+{data ? (globalState.page=="home" ?(    <HomePage></HomePage>):
+  ( globalState.page==="battle"?( <BattlePage></BattlePage>):(<FinalPage></FinalPage>))):(null)}
   </>
+  </AppContext.Provider>
   );
 
 
